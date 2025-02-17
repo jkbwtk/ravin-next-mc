@@ -1,0 +1,29 @@
+{
+  "name": "ravin-next-mc",
+  "private": true,
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "bun --watch .",
+    "dev-node": "cross-env TS_NODE_PROJECT=./tsconfig.json tsnd -r tsconfig-paths/register ./src/index.ts",
+    "lint": "bun run --bun biome check --write",
+    "test": "bun run --bun vitest"
+  },
+  "dependencies": {
+    "mineflayer": "^4.26.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "prismarine-chat": "^1.11.0",
+    "ts-node-dev": "^2.0.0",
+    "tsconfig-paths": "^4.2.0",
+    "vec3": "^0.1.10"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.3",
+    "@types/bun": "^1.2.2",
+    "@vitest/coverage-v8": "^3.0.4",
+    "cross-env": "^7.0.3",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
+  },
+  "packageManager": "pnpm@9.4.0+sha1.9217c800d4ab947a7aee520242a7b70d64fc7638"
+}
