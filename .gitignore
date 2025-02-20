@@ -26,3 +26,5 @@ dist-ssr
 .env
 playground.ts
 build/
+
+config.json

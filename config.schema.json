@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Config",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "auth": {
+            "type": "string",
+            "enum": [
+              "easyAuth",
+              "offline"
+            ]
+          },
+          "password": {
+            "type": "string"
+          },
+          "createAccount": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "username",
+          "auth",
+          "password"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "hostname": {
+      "type": "string"
+    },
+    "port": {
+      "type": "number",
+      "default": 25565
+    },
+    "loopInterval": {
+      "type": "number",
+      "default": 1000
+    }
+  },
+  "required": [
+    "credentials",
+    "hostname"
+  ],
+  "additionalProperties": false
+}

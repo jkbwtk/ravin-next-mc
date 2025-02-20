@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "CommonJS",
+    "module": "NodeNext",
     "skipLibCheck": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "importHelpers": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
