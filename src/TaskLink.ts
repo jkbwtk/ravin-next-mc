@@ -28,7 +28,7 @@ export interface TaskLinkOptions<
 
 export class TaskLink<
   CT extends Task = Task,
-  NT extends Task = Task,
+  NT extends Task<TaskResult<CT>, unknown, unknown> = Task,
   FT extends Task = Task,
 > implements
     Required<TaskLinkConfigParams<CT, NT, FT>>,
