@@ -1,7 +1,5 @@
 import type { Task } from '#/tasks/Task';
-
-type TriggerCtx<T extends Task> = Parameters<T['onStart']>[1];
-type TaskResult<T extends Task> = ReturnType<T['onDone']>;
+import type { TaskResult, TriggerCtx } from '#/types/TaskUtilTypes';
 
 export interface TaskLinkOverrides<CT extends Task> {
   shouldAdvance?: () => boolean;

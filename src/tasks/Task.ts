@@ -1,5 +1,12 @@
 export class Task<TASK_CTX = unknown, TRIGGER_CTX = unknown, RESULT = unknown> {
-  public running = false;
+  private _running = false;
+
+  public get running(): boolean {
+    return this._running;
+  }
+  public set running(state: boolean) {
+    this._running = state;
+  }
 
   public onStart(_taskCtx: TASK_CTX, _triggerCtx: TRIGGER_CTX) {
     return;
