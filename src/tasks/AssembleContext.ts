@@ -70,7 +70,7 @@ export class AssembleContext<
           this.state.results.push([key, task.onDone()]);
           task.running = false;
 
-          this.state.activeTask = this.state.tasks.pop();
+          this.state.activeTask = this.state.tasks.shift();
 
           if (this.state.activeTask) {
             this.state.activeTask[1].onStart(this.state.context, null);
