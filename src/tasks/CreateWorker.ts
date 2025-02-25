@@ -141,9 +141,19 @@ export class CreateWorker extends Task<void, void, Worker> {
           this.state.bot?.chat(
             `/register ${credentials.password} ${credentials.password}`,
           );
+        } else {
+          this.state.authAttemptCounter = Number.POSITIVE_INFINITY;
+          this.credentialsDepot.invalidate(this.state.credentials[0]);
         }
 
         this.state.authAttemptCounter += 1;
+        break;
+      }
+
+      case 'text.easyauth.wrongPassword': {
+        this.state.authAttemptCounter = Number.POSITIVE_INFINITY;
+        this.credentialsDepot.invalidate(this.state.credentials[0]);
+
         break;
       }
 

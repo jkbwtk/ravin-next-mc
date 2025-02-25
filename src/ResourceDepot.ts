@@ -3,6 +3,7 @@ export class ResourceDepot<T> {
 
   private available: Set<number> = new Set();
   private claimed: Set<number> = new Set();
+  private invalidated: Set<number> = new Set();
 
   constructor(resources: T[]) {
     this.resources = resources;
@@ -36,6 +37,13 @@ export class ResourceDepot<T> {
     }
 
     return false;
+  }
+
+  public invalidate(id: number) {
+    this.available.delete(id);
+    this.claimed.delete(id);
+
+    this.invalidated.add(id);
   }
 
   public add(resource: T) {
