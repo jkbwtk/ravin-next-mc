@@ -1,17 +1,24 @@
 import { Task } from '#/tasks/Task';
-import type { TaskCtx, TaskResult } from '#/types/TaskUtilTypes';
+
+type CTX_MAPPER<TASK_CTX, WRAPPED_TASK_CTX> = (
+  ctx: TASK_CTX,
+) => WRAPPED_TASK_CTX;
+type RESULT_MAPPER<TASK_CTX, WRAPPED_TASK_RESULT, RESULT> = (
+  ctx: TASK_CTX,
+  result: WRAPPED_TASK_RESULT,
+) => RESULT;
 
 export class ExecuteWithMappers<
   TASK_CTX,
+  TRIGGER_CTX,
   RESULT,
-  TASK extends Task,
-  CTX_MAPPER extends (ctx: TASK_CTX) => TaskCtx<TASK>,
-  RESULT_MAPPER extends (ctx: TASK_CTX, result: TaskResult<TASK>) => RESULT,
-> extends Task<TASK_CTX, unknown, RESULT> {
-  private task: TASK;
+  WRAPPED_TASK_CTX,
+  WRAPPED_TASK_RESULT,
+> extends Task<TASK_CTX, TRIGGER_CTX, RESULT> {
+  private task: Task<WRAPPED_TASK_CTX, TRIGGER_CTX, WRAPPED_TASK_RESULT>;
 
-  private ctxMapper: CTX_MAPPER;
-  private resultMapper: RESULT_MAPPER;
+  private ctxMapper: CTX_MAPPER<TASK_CTX, WRAPPED_TASK_CTX>;
+  private resultMapper: RESULT_MAPPER<TASK_CTX, WRAPPED_TASK_RESULT, RESULT>;
 
   private ctx: TASK_CTX = null!;
 
@@ -23,7 +30,11 @@ export class ExecuteWithMappers<
     this.task.running = state;
   }
 
-  constructor(task: TASK, ctxMapper: CTX_MAPPER, resultMapper: RESULT_MAPPER) {
+  constructor(
+    task: Task<WRAPPED_TASK_CTX, TRIGGER_CTX, WRAPPED_TASK_RESULT>,
+    ctxMapper: CTX_MAPPER<TASK_CTX, WRAPPED_TASK_CTX>,
+    resultMapper: RESULT_MAPPER<TASK_CTX, WRAPPED_TASK_RESULT, RESULT>,
+  ) {
     super();
 
     this.task = task;
@@ -36,7 +47,7 @@ export class ExecuteWithMappers<
     this.isFailed = this.task.isFailed;
   }
 
-  public onStart(taskCtx: TASK_CTX, triggerCtx: unknown): void {
+  public onStart(taskCtx: TASK_CTX, triggerCtx: TRIGGER_CTX): void {
     const mappedCtx = this.ctxMapper(taskCtx);
 
     this.ctx = taskCtx;
@@ -49,7 +60,6 @@ export class ExecuteWithMappers<
     const ctx = this.ctx;
     this.ctx = null!;
 
-    // @ts-expect-error
     return this.resultMapper(ctx, result);
   }
 }

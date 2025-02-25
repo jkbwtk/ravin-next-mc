@@ -10,7 +10,11 @@ interface State<SINGLE_CTX> {
   hasFailed: boolean;
 }
 
-export class LoopOverArray<SINGLE_CTX> extends Task {
+export class LoopOverArray<SINGLE_CTX> extends Task<
+  SINGLE_CTX[],
+  undefined,
+  void
+> {
   private task: TASK<SINGLE_CTX>;
 
   private defaultState: State<SINGLE_CTX> = {
