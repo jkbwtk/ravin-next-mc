@@ -62,4 +62,8 @@ export class ExecuteWithMappers<
 
     return this.resultMapper(ctx, result);
   }
+
+  public onFailed(): void {
+    this.task.onFailed();
+  }
 }
