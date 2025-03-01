@@ -7,10 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "include": [
-      "./src/**/*",
-      "./tools/**/*"
-    ]
+    "include": ["./src/**/*", "./tools/**/*"]
   },
   "formatter": {
     "enabled": true,
@@ -27,7 +24,11 @@
       "correctness": {
         "useImportExtensions": "off",
         "noNodejsModules": "off",
-        "noUndeclaredDependencies": "off"
+        "noUndeclaredDependencies": "off",
+        "useHookAtTopLevel": "off",
+        "noUnusedVariables": "info",
+        "noUnusedFunctionParameters": "info",
+        "noUnusedPrivateClassMembers": "info"
       },
       "suspicious": {
         "noConsole": "off",
