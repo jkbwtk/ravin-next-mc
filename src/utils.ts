@@ -53,3 +53,24 @@ export type RequiredDefaults<T extends Record<string, unknown>> = Required<
 export const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
 };
+
+export function range(end: number, inclusive?: boolean): number[];
+export function range(
+  start: number,
+  end: number,
+  inclusive?: boolean,
+): number[];
+export function range(a: number, b?: number | boolean, c = false): number[] {
+  const start = typeof b === 'number' ? a : 0;
+  const end = typeof b === 'number' ? b : a;
+  const inclusive = typeof b === 'boolean' ? b : c;
+
+  const length = Math.abs(end - start) + (inclusive ? 1 : 0);
+
+  const mapper =
+    end >= start
+      ? (_v: unknown, i: number) => i + start
+      : (_v: unknown, i: number) => start - i;
+
+  return Array.from({ length }).map(mapper);
+}
