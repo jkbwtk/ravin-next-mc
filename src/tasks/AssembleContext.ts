@@ -66,6 +66,8 @@ export class AssembleContext<
       const [key, task] = this.state.activeTask;
 
       if (task.running) {
+        task.tick();
+
         if (task.isDone()) {
           this.state.results.push([key, task.onDone()]);
           task.running = false;
