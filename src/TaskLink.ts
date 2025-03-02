@@ -2,7 +2,7 @@ import type { Task } from '#/tasks/Task';
 import type { TaskResult, TriggerCtx } from '#/types/TaskUtilTypes';
 
 export interface TaskLinkOverrides<CT extends Task> {
-  shouldAdvance?: () => boolean;
+  shouldAdvance?: (ctx: TaskResult<CT>) => boolean;
   onSuccess?: (result: TaskResult<CT>) => void;
   onFailure?: () => void;
 }
@@ -50,10 +50,8 @@ export class TaskLink<
   }
 
   public trigger(ctx: TriggerCtx<NT>) {
-    if (this.current.running) {
-      this.triggered = true;
-      this.triggerCtx = ctx;
-    }
+    this.triggered = true;
+    this.triggerCtx = ctx;
   }
 
   public untrigger() {
@@ -65,7 +63,7 @@ export class TaskLink<
     return ctx;
   }
 
-  public shouldAdvance = () => false;
+  public shouldAdvance = (_ctx: TaskResult<CT>) => false;
 
   public onSuccess = (_result: TaskResult<CT>) => {
     return;

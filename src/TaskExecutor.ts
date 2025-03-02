@@ -16,6 +16,7 @@ export class TaskExecutor<
   public readonly lastTask?: LT;
 
   public activeTask?: Task;
+  public activeTaskResult?: ReturnType<Task['onDone']>;
 
   constructor(links: L, firstTask: FT, lastTask?: LT) {
     super();
@@ -72,6 +73,7 @@ export class TaskExecutor<
       this.activeTask.running = false;
 
       this.activeTask = undefined;
+      this.activeTaskResult = undefined;
 
       return result;
     }
@@ -88,46 +90,67 @@ export class TaskExecutor<
   };
 
   public override tick = () => {
-    this.activeTask?.tick();
+    if (this.activeTask === undefined) {
+      return;
+    }
 
-    for (const [name, link] of this.links.entries()) {
-      if (link.current === this.activeTask) {
-        if (this.activeTask.isDone()) {
-          if (link.triggered || link.shouldAdvance()) {
-            console.log(`Advancing link ${String(name)}`);
+    this.activeTask.running && this.activeTask.tick();
 
-            const triggerCtx = link.untrigger();
-            const result = this.activeTask.onDone();
-            this.activeTask.running = false;
+    const validEntries = this.links
+      .entries()
+      .filter(([_name, link]) => link.current === this.activeTask);
 
-            link.onSuccess(result);
+    for (const [name, link] of validEntries) {
+      if (this.activeTask.running && this.activeTask.isDone()) {
+        this.activeTaskResult = this.activeTask.onDone();
+        this.activeTask.running = false;
+      } else if (this.activeTask.running && this.activeTask.isFailed()) {
+        this.handleLinkFallback(name, link);
 
-            this.activeTask = link.next;
+        break;
+      }
 
-            this.activeTask.onStart(result, triggerCtx);
-            this.activeTask.running = true;
-
-            break;
-          }
-        }
-
-        if (this.activeTask.isFailed()) {
-          console.log(`Falling back on link ${String(name)}`);
-
-          const triggerCtx = link.untrigger();
-          this.activeTask.onFailed();
-          this.activeTask.running = false;
-
-          link.onFailure();
-
-          this.activeTask = link.fallback;
-
-          this.activeTask.onStart(null, triggerCtx);
-          this.activeTask.running = true;
+      if (this.activeTask.running === false) {
+        if (link.triggered || link.shouldAdvance(this.activeTaskResult)) {
+          this.handleLinkAdvancement(name, link);
 
           break;
         }
       }
     }
   };
+
+  private handleLinkAdvancement(name: keyof L, link: L[keyof L]) {
+    console.log(`Advancing link ${String(name)}`);
+
+    const triggerCtx = link.untrigger();
+
+    link.onSuccess(this.activeTaskResult);
+
+    this.activeTask = link.next;
+
+    this.activeTask.onStart(this.activeTaskResult, triggerCtx);
+    this.activeTask.running = true;
+
+    this.activeTaskResult = undefined;
+  }
+
+  private handleLinkFallback(name: keyof L, link: L[keyof L]) {
+    if (this.activeTask === undefined) {
+      throw new Error('Missing active task');
+    }
+
+    console.log(`Falling back on link ${String(name)}`);
+
+    const triggerCtx = link.untrigger();
+    this.activeTask.onFailed();
+    this.activeTask.running = false;
+
+    link.onFailure();
+
+    this.activeTask = link.fallback;
+
+    this.activeTask.onStart(null, triggerCtx);
+    this.activeTask.running = true;
+  }
 }
