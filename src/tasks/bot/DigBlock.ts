@@ -29,7 +29,7 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
 
   state = structuredClone(this.defaultState);
 
-  constructor(bot: Bot, options: DigBlockOptions) {
+  constructor(bot: Bot, options: DigBlockOptions = {}) {
     super(bot);
 
     this.options = mergeOptions(options, this.defaultOptions);

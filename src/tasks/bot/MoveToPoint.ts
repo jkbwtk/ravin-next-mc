@@ -10,9 +10,11 @@ export type MoveToPointOptions = {
   allow1by1towers?: boolean;
   allowSprinting?: boolean;
   allowParkour?: boolean;
+
+  range?: number;
 };
 
-export class MoveToPoint extends BotTask<Vec3> {
+export class MoveToPoint extends BotTask<Vec3, unknown, Vec3> {
   movements: Movements = null!;
 
   defaultOptions: RequiredDefaults<MoveToPointOptions> = {
@@ -21,9 +23,13 @@ export class MoveToPoint extends BotTask<Vec3> {
     allow1by1towers: false,
     allowSprinting: true,
     allowParkour: true,
+
+    range: 0,
   };
 
   options: Required<MoveToPointOptions>;
+
+  point: Vec3 = null!;
 
   constructor(bot: Bot, options: MoveToPointOptions = {}) {
     super(bot);
@@ -31,6 +37,8 @@ export class MoveToPoint extends BotTask<Vec3> {
   }
 
   public override onStart = (point: Vec3, _triggerCtx: unknown) => {
+    this.point = point;
+
     this.movements = new Movements(this.bot);
 
     this.movements.canDig = this.options.canDig;
@@ -41,7 +49,7 @@ export class MoveToPoint extends BotTask<Vec3> {
 
     this.bot.pathfinder.setMovements(this.movements);
 
-    const goal = new goals.GoalNearXZ(point.x, point.z, 0);
+    const goal = new goals.GoalNearXZ(point.x, point.z, this.options.range);
 
     this.bot.pathfinder.setGoal(goal);
   };
@@ -50,8 +58,10 @@ export class MoveToPoint extends BotTask<Vec3> {
     return !this.bot.pathfinder.isMoving();
   };
 
-  public override onDone = () => {
+  public override onDone = (): Vec3 => {
     this.cleanup();
+
+    return this.point;
   };
 
   public override onFailed() {
