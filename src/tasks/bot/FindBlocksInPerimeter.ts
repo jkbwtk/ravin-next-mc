@@ -185,19 +185,19 @@ export class FindBlocksInPerimeter extends BotTask<
           this.isBlockInSubchunk(subchunk)
         ) {
           for (
-            let y = Math.max(chunkY - 1, e.minY);
+            let y = Math.max(chunkY, e.minY);
             y <= Math.min(chunkY + 15, e.maxY);
             y += 1
           ) {
             for (
-              let x = Math.max(chunkX - 1, e.minX);
-              x <= Math.min(chunkX + 15, e.maxX);
-              x += 1
+              let z = Math.max(chunkZ, e.minZ);
+              z <= Math.min(chunkZ + 15, e.maxZ);
+              z += 1
             ) {
               for (
-                let z = Math.max(chunkZ - 1, e.minZ);
-                z <= Math.min(chunkZ + 15, e.maxZ);
-                z += 1
+                let x = Math.max(chunkX, e.minX);
+                x <= Math.min(chunkX + 15, e.maxX);
+                x += 1
               ) {
                 const block = this.bot.blockAt(
                   new Vec3(x, y, z),
