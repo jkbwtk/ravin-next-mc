@@ -12,11 +12,15 @@ interface State {
 
 export type DigBlockOptions = {
   ignoreFailure?: boolean;
+  inSight?: boolean;
+  verifyBlock?: boolean;
 };
 
 export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
   defaultOptions: RequiredDefaults<DigBlockOptions> = {
     ignoreFailure: true,
+    inSight: true,
+    verifyBlock: true,
   };
 
   options: Required<DigBlockOptions>;
@@ -47,6 +51,11 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
 
     this.state.targetBlock = block;
 
+    if (this.isValid() === false) {
+      this.state.failed = true;
+      return;
+    }
+
     this.bot
       .dig(this.state.targetBlock)
       .then(() => {
@@ -55,6 +64,25 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
       .catch(() => {
         this.state.failed = true;
       });
+  }
+
+  private isValid(): boolean {
+    if (this.options.verifyBlock) {
+      const currentBlock = this.bot.blockAt(this.state.targetBlock.position);
+
+      if (currentBlock?.stateId !== this.state.targetBlock.stateId) {
+        return false;
+      }
+    }
+
+    if (
+      this.options.inSight &&
+      this.bot.canSeeBlock(this.state.targetBlock) === false
+    ) {
+      return false;
+    }
+
+    return true;
   }
 
   public isDone = () =>
