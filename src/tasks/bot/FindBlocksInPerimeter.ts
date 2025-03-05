@@ -25,7 +25,8 @@ export type FindBlocksInPerimeterOptions = Omit<
   'maxDistance' | 'point'
 > & {
   chunksPerTick?: number;
-  sorted?: boolean;
+
+  sortFn?: ((a: Block, b: Block) => number) | false;
 };
 
 export class FindBlocksInPerimeter extends BotTask<
@@ -42,7 +43,8 @@ export class FindBlocksInPerimeter extends BotTask<
     count: Number.POSITIVE_INFINITY,
     useExtraInfo: false,
     chunksPerTick: 4,
-    sorted: true,
+
+    sortFn: false,
   };
 
   private defaultState: State = {
@@ -137,13 +139,7 @@ export class FindBlocksInPerimeter extends BotTask<
 
     this.state = structuredClone(this.defaultState);
 
-    // const pos = this.bot.player.entity.position;
-
-    // return result.sort(
-    //   (a, b) => pos.distanceTo(a.position) - pos.distanceTo(b.position),
-    // );
-
-    return result;
+    return this.options.sortFn ? result.sort(this.options.sortFn) : result;
   }
 
   public onFailed(): void {
