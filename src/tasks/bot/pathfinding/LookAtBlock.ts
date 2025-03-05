@@ -31,7 +31,7 @@ export class LookAtBlock extends BasePathfinder<
     options: LookAtBlockOptions & BasePathfinderOptions = {},
   ) {
     const overrideOptions: RequiredDefaults<LookAtBlockOptions> = {
-      reach: 3,
+      reach: 4.5,
     };
 
     super(bot, options, overrideOptions);
