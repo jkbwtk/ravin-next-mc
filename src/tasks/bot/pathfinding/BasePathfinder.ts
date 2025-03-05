@@ -7,6 +7,8 @@ import { type RequiredDefaults, mergeOptions } from '#/utils';
 interface State<CTX> {
   point: Vec3;
   movements: Movements;
+  isFinished: boolean;
+  idleTicksCounter: number;
 
   ctx: CTX;
 }
@@ -17,6 +19,8 @@ export type BasePathfinderOptions = {
   allow1by1towers?: boolean;
   allowSprinting?: boolean;
   allowParkour?: boolean;
+
+  idleTicksLimit?: number;
 };
 
 export abstract class BasePathfinder<
@@ -36,6 +40,8 @@ export abstract class BasePathfinder<
     allow1by1towers: false,
     allowSprinting: true,
     allowParkour: true,
+
+    idleTicksLimit: 20,
   };
 
   private defaultState: State<CTX> = {
@@ -43,11 +49,14 @@ export abstract class BasePathfinder<
     movements: null!,
 
     ctx: null!,
+
+    isFinished: false,
+    idleTicksCounter: 0,
   };
 
-  protected options: Required<BasePathfinderOptions> & Required<O>;
+  public options: Required<BasePathfinderOptions> & Required<O>;
 
-  protected state = structuredClone(this.defaultState);
+  public state = structuredClone(this.defaultState);
 
   constructor(
     bot: Bot,
@@ -59,7 +68,7 @@ export abstract class BasePathfinder<
     //@ts-expect-error
     this.options = mergeOptions(options, {
       ...this.defaultOptions,
-      overrideDefaultOptions,
+      ...overrideDefaultOptions,
     });
   }
 
@@ -78,10 +87,9 @@ export abstract class BasePathfinder<
     this.state.movements.allowParkour = this.options.allowParkour;
 
     this.bot.pathfinder.setMovements(this.state.movements);
+    this.bot.pathfinder.setGoal(this.goalGenerator());
 
-    const goal = this.goalGenerator();
-
-    this.bot.pathfinder.setGoal(goal);
+    this.bot.once('goal_reached', this.handleGoalReached);
   }
 
   public onDone(): RES {
@@ -97,12 +105,30 @@ export abstract class BasePathfinder<
   }
 
   public override isDone = () => {
-    return !this.bot.pathfinder.isMoving();
+    return this.state.isFinished;
+  };
+
+  public isFailed = () => {
+    if (
+      this.bot.pathfinder.isMoving() === false &&
+      this.bot.pathfinder.isBuilding() === false &&
+      this.bot.pathfinder.isMining() === false
+    ) {
+      this.state.idleTicksCounter += 1;
+    }
+
+    return this.state.idleTicksCounter > this.options.idleTicksLimit;
   };
 
   private cleanup() {
     this.bot.pathfinder.setGoal(null);
 
     this.state = structuredClone(this.defaultState);
+
+    this.bot.off('goal_reached', this.handleGoalReached);
   }
+
+  private handleGoalReached = () => {
+    this.state.isFinished = true;
+  };
 }
