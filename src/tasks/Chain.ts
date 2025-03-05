@@ -208,6 +208,10 @@ export class Chain<
       }
     } else if (this.activeTask.isFailed()) {
       this.activeTask.running = false;
+
+      if (this.options.ignoreFailure) {
+        this.onFailed();
+      }
     }
   };
 }
