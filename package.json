@@ -10,11 +10,16 @@
     "test": "bun run --bun vitest"
   },
   "dependencies": {
+    "minecraft-data": "^3.84.1",
     "mineflayer": "^4.26.0",
     "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-web-inventory": "^1.8.5",
     "prismarine-block": "^1.21.0",
     "prismarine-chat": "^1.11.0",
     "prismarine-chunk": "^1.38.1",
+    "prismarine-entity": "^2.5.0",
+    "prismarine-registry": "^1.11.0",
+    "prismarine-windows": "^2.9.0",
     "prismarine-world": "^3.6.3",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
@@ -23,11 +28,11 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
-    "@types/bun": "^1.2.2",
-    "@vitest/coverage-v8": "^3.0.4",
+    "@types/bun": "^1.2.4",
+    "@vitest/coverage-v8": "^3.0.8",
     "cross-env": "^7.0.3",
-    "typescript": "^5.7.3",
-    "vitest": "^3.0.4"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8"
   },
   "packageManager": "pnpm@9.4.0+sha1.9217c800d4ab947a7aee520242a7b70d64fc7638"
 }
