@@ -32,3 +32,13 @@ export function patchMaterials() {
     }
   }
 }
+
+export function patchBlockMaterialTypes() {
+  const data = mcData('1.21.4');
+
+  for (const block of data.blocksArray) {
+    if (block.material === 'incorrect_for_wooden_tool') {
+      block.material = 'mineable/pickaxe';
+    }
+  }
+}
