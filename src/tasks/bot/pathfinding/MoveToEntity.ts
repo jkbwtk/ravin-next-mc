@@ -9,6 +9,8 @@ import type { RequiredDefaults } from '#/utils';
 
 export type MoveToEntityOptions = {
   range?: number;
+
+  skipIfGone?: boolean;
 };
 
 export class MoveToEntity extends BasePathfinder<
@@ -32,8 +34,20 @@ export class MoveToEntity extends BasePathfinder<
   ) {
     const overrideOptions: RequiredDefaults<MoveToEntityOptions> = {
       range: 0,
+      skipIfGone: true,
     };
 
     super(bot, options, overrideOptions);
   }
+
+  public isDone = (): boolean => {
+    if (
+      this.options.skipIfGone &&
+      this.bot.entities[this.state.ctx.id] === undefined
+    ) {
+      return true;
+    }
+
+    return this.state.isFinished;
+  };
 }
