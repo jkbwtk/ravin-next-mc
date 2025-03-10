@@ -56,6 +56,14 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
       return;
     }
 
+    const bestTool = this.bot.pathfinder.bestHarvestTool(
+      this.state.targetBlock,
+    );
+
+    if (bestTool) {
+      this.bot.equip(bestTool, 'hand');
+    }
+
     this.bot
       .dig(this.state.targetBlock)
       .then(() => {
