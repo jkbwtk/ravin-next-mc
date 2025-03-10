@@ -1,45 +1,38 @@
 import type { Task } from '#/tasks/Task';
-import type { TaskResult, TriggerCtx } from '#/types/TaskUtilTypes';
-
-export interface TaskLinkOverrides<CT extends Task> {
-  shouldAdvance?: (ctx: TaskResult<CT>) => boolean;
-  onSuccess?: (result: TaskResult<CT>) => void;
-  onFailure?: () => void;
-}
-
-export interface TaskLinkConfigParams<
-  CT extends Task,
-  NT extends Task,
-  FT extends Task,
-> {
-  current: CT;
-  next: NT;
-  fallback: FT;
-}
 
 export interface TaskLinkOptions<
-  CT extends Task,
-  NT extends Task,
-  FT extends Task,
-> extends TaskLinkOverrides<CT>,
-    TaskLinkConfigParams<CT, NT, FT> {}
+  CT_CTX,
+  CT_TRIGGER,
+  CT_RESULT,
+  NT_TRIGGER,
+  NT_RESULT,
+> {
+  shouldAdvance?: (ctx: CT_RESULT) => boolean;
+  onSuccess?: (result: CT_RESULT) => void;
+  onFailure?: () => void;
 
-export class TaskLink<
-  CT extends Task = Task,
-  NT extends Task<TaskResult<CT>, unknown, unknown> = Task,
-  FT extends Task = Task,
-> implements
-    Required<TaskLinkConfigParams<CT, NT, FT>>,
-    Required<TaskLinkOverrides<CT>>
-{
-  current: CT;
-  next: NT;
-  fallback: FT;
+  current: Task<CT_CTX, CT_TRIGGER, CT_RESULT>;
+  next: Task<CT_RESULT, NT_TRIGGER, NT_RESULT>;
+  fallback: Task;
+}
 
-  triggered = false;
-  triggerCtx: TriggerCtx<NT> = null!;
+export class TaskLink<CT_CTX, CT_TRIGGER, CT_RESULT, NT_TRIGGER, NT_RESULT> {
+  public current: Task<CT_CTX, CT_TRIGGER, CT_RESULT>;
+  public next: Task<CT_RESULT, NT_TRIGGER, NT_RESULT>;
+  public fallback: Task;
 
-  constructor(options: TaskLinkOptions<CT, NT, FT>) {
+  public triggered = false;
+  public triggerCtx: NT_TRIGGER = null!;
+
+  constructor(
+    options: TaskLinkOptions<
+      CT_CTX,
+      CT_TRIGGER,
+      CT_RESULT,
+      NT_TRIGGER,
+      NT_RESULT
+    >,
+  ) {
     this.current = options.current;
     this.next = options.next;
     this.fallback = options.fallback;
@@ -49,7 +42,7 @@ export class TaskLink<
     this.onFailure = options.onFailure ?? this.onFailure;
   }
 
-  public trigger(ctx: TriggerCtx<NT>) {
+  public trigger(ctx: NT_TRIGGER) {
     this.triggered = true;
     this.triggerCtx = ctx;
   }
@@ -63,9 +56,9 @@ export class TaskLink<
     return ctx;
   }
 
-  public shouldAdvance = (_ctx: TaskResult<CT>) => false;
+  public shouldAdvance = (_ctx: CT_RESULT) => false;
 
-  public onSuccess = (_result: TaskResult<CT>) => {
+  public onSuccess = (_result: CT_RESULT) => {
     return;
   };
 
