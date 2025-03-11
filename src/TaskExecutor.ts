@@ -7,7 +7,15 @@ type FirstTaskStartParams<T extends Task> = Parameters<T['onStart']>;
 export class TaskExecutor<
   FT extends Task = Task,
   LT extends Task = Task,
-  L extends Record<string, TaskLink> = Record<string, TaskLink>,
+  L extends Record<
+    string,
+    // biome-ignore lint/suspicious/noExplicitAny: yeah
+    TaskLink<any, any, any, any, any, any>
+  > = Record<
+    string,
+    // biome-ignore lint/suspicious/noExplicitAny: yeah
+    TaskLink<any, any, any, any, any, any>
+  >,
 > extends Task {
   public readonly links: Map<keyof L, L[keyof L]>;
   public readonly tasks: Task[];
