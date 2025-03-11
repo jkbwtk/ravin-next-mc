@@ -4,6 +4,7 @@ export interface TaskLinkOptions<
   CT_CTX,
   CT_TRIGGER,
   CT_RESULT,
+  NT_CTX,
   NT_TRIGGER,
   NT_RESULT,
 > {
@@ -12,11 +13,18 @@ export interface TaskLinkOptions<
   onFailure?: () => void;
 
   current: Task<CT_CTX, CT_TRIGGER, CT_RESULT>;
-  next: Task<CT_RESULT, NT_TRIGGER, NT_RESULT>;
+  next: Task<NT_CTX, NT_TRIGGER, NT_RESULT>;
   fallback: Task;
 }
 
-export class TaskLink<CT_CTX, CT_TRIGGER, CT_RESULT, NT_TRIGGER, NT_RESULT> {
+export class TaskLink<
+  CT_CTX,
+  CT_TRIGGER,
+  CT_RESULT extends NT_CTX,
+  NT_CTX,
+  NT_TRIGGER,
+  NT_RESULT,
+> {
   public current: Task<CT_CTX, CT_TRIGGER, CT_RESULT>;
   public next: Task<CT_RESULT, NT_TRIGGER, NT_RESULT>;
   public fallback: Task;
@@ -29,6 +37,7 @@ export class TaskLink<CT_CTX, CT_TRIGGER, CT_RESULT, NT_TRIGGER, NT_RESULT> {
       CT_CTX,
       CT_TRIGGER,
       CT_RESULT,
+      NT_CTX,
       NT_TRIGGER,
       NT_RESULT
     >,
