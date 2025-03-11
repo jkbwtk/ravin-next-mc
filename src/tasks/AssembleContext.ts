@@ -9,29 +9,34 @@ interface State<C> {
   results: [string, ReturnType<Task<C>['onDone']>][];
 }
 
-export class AssembleContext<
-  C,
-  S extends Record<string, Task<C>>,
-> extends Task {
-  contextShape: S;
+type TasksShape<SHAPE extends Record<string, unknown>, CTX = unknown> = {
+  [Key in keyof SHAPE]: Task<CTX, unknown, SHAPE[Key]>;
+};
 
-  defaultState: State<C> = {
+export class AssembleContext<
+  // @ts-expect-error
+  SHAPE extends Record<unknown, unknown>,
+  CTX = unknown,
+> extends Task {
+  contextShape: TasksShape<SHAPE, CTX>;
+
+  defaultState: State<CTX> = {
     context: null!,
     tasks: [],
 
     results: [],
   };
 
-  state: State<C>;
+  state: State<CTX>;
 
-  constructor(shape: S) {
+  constructor(shape: TasksShape<SHAPE, CTX>) {
     super();
     this.contextShape = shape;
 
     this.state = structuredClone(this.defaultState);
   }
 
-  public onStart(taskCtx: C, triggerCtx: unknown): void {
+  public onStart(taskCtx: CTX, triggerCtx: unknown): void {
     this.state = structuredClone(this.defaultState);
 
     this.state.tasks = Object.entries(this.contextShape);
@@ -44,7 +49,7 @@ export class AssembleContext<
     }
   }
 
-  public onDone(): { [Key in keyof S]: ReturnType<S[Key]['onDone']> } {
+  public onDone(): { [Key in keyof SHAPE]: SHAPE[Key] } {
     // @ts-expect-error
     return Object.fromEntries(this.state.results);
   }
