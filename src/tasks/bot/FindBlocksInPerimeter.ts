@@ -13,12 +13,11 @@ interface State {
   subchunksToProcess: number[];
   minY: number;
   maxY: number;
-  finished: boolean;
   checkCounter: number;
 }
 
-type Matcher = (block: Block) => boolean;
-type FullMatcher = (block: Block) => boolean;
+export type Matcher = (block: Block) => boolean;
+export type FullMatcher = (block: Block) => boolean;
 
 export type FindBlocksInPerimeterOptions = Omit<
   FindBlockOptions,
@@ -54,7 +53,6 @@ export class FindBlocksInPerimeter extends BotTask<
     subchunksToProcess: [],
     minY: 0,
     maxY: 256,
-    finished: false,
     checkCounter: 0,
   };
 
@@ -81,9 +79,7 @@ export class FindBlocksInPerimeter extends BotTask<
         : this.options.useExtraInfo;
   }
 
-  private static createMatcher(
-    matching: FindBlockOptions['matching'],
-  ): Matcher {
+  public static createMatcher(matching: FindBlockOptions['matching']): Matcher {
     if (typeof matching === 'function') {
       return matching;
     }
@@ -93,7 +89,7 @@ export class FindBlocksInPerimeter extends BotTask<
     return (block: Block) => ids.includes(block.type);
   }
 
-  private static createFullMatcher(
+  public static createFullMatcher(
     matcher: Matcher,
     useExtraInfo: FindBlockOptions['useExtraInfo'],
   ): FullMatcher {
