@@ -1,4 +1,5 @@
 import { Task } from '#/tasks/Task';
+import { type RequiredDefaults, mergeOptions } from '#/utils';
 
 type TASK<SINGLE_CTX> = Task<SINGLE_CTX, unknown, void>;
 
@@ -10,12 +11,18 @@ interface State<SINGLE_CTX> {
   hasFailed: boolean;
 }
 
+export type LoopOverArrayOptions = {
+  ignoreFailure?: boolean;
+};
+
 export class LoopOverArray<SINGLE_CTX> extends Task<
   SINGLE_CTX[],
   undefined,
   void
 > {
-  private task: TASK<SINGLE_CTX>;
+  private defaultOptions: RequiredDefaults<LoopOverArrayOptions> = {
+    ignoreFailure: false,
+  };
 
   private defaultState: State<SINGLE_CTX> = {
     ctx: [],
@@ -25,14 +32,17 @@ export class LoopOverArray<SINGLE_CTX> extends Task<
     hasFailed: false,
   };
 
-  private state: State<SINGLE_CTX>;
+  private options: Required<LoopOverArrayOptions>;
 
-  constructor(task: TASK<SINGLE_CTX>) {
+  private task: TASK<SINGLE_CTX>;
+
+  private state = structuredClone(this.defaultState);
+
+  constructor(task: TASK<SINGLE_CTX>, options: LoopOverArrayOptions = {}) {
     super();
 
     this.task = task;
-
-    this.state = structuredClone(this.defaultState);
+    this.options = mergeOptions(options, this.defaultOptions);
   }
 
   public onStart(taskCtx: SINGLE_CTX[], triggerCtx: unknown): void {
@@ -50,6 +60,14 @@ export class LoopOverArray<SINGLE_CTX> extends Task<
 
     this.task.onStart(singleCtx, triggerCtx);
     this.task.running = true;
+  }
+
+  public onDone(): void {
+    this.cleanup();
+  }
+
+  public onFailed(): void {
+    this.cleanup();
   }
 
   public tick = () => {
@@ -79,7 +97,18 @@ export class LoopOverArray<SINGLE_CTX> extends Task<
     }
   };
 
-  public isDone = () => this.state.hasFinished;
+  public isDone = () => {
+    if (this.options.ignoreFailure) {
+      return this.state.hasFinished || this.state.hasFailed;
+    }
 
-  public isFailed = () => this.state.hasFailed;
+    return this.state.hasFinished;
+  };
+
+  public isFailed = () =>
+    this.options.ignoreFailure === false && this.state.hasFailed;
+
+  private cleanup() {
+    this.state = structuredClone(this.defaultState);
+  }
 }
