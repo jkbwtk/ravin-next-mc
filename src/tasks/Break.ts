@@ -1,30 +1,58 @@
 import { Task } from '#/tasks/Task';
 
+interface State<T> {
+  ctx: T;
+
+  shouldBreak: boolean | null;
+}
+
 export class Break<T> extends Task<T, undefined, T> {
-  private ctx: T = null!;
+  private defaultState: State<T> = {
+    ctx: null!,
+    shouldBreak: null,
+  };
 
-  private shouldBreak: (ctx: T) => boolean;
+  private state = structuredClone(this.defaultState);
 
-  constructor(shouldBreak: (ctx: T) => boolean) {
+  private breakChecker: (ctx: T) => boolean;
+
+  constructor(breakChecker: (ctx: T) => boolean) {
     super();
 
-    this.shouldBreak = shouldBreak;
+    this.breakChecker = breakChecker;
   }
 
   public onStart(taskCtx: T, _triggerCtx: undefined): void {
-    this.ctx = taskCtx;
+    this.state = structuredClone(this.defaultState);
+
+    this.state.ctx = taskCtx;
   }
 
   public onDone(): T {
-    const ctx = this.ctx;
-    this.ctx = null!;
+    const ctx = this.state.ctx;
+
+    this.cleanup();
 
     return ctx;
   }
 
   public onFailed(): void {
-    this.ctx = null!;
+    this.cleanup();
   }
 
-  public isFailed = () => this.shouldBreak(this.ctx);
+  public isDone = () => {
+    return this.isFailed() === false;
+  };
+
+  public isFailed = () => {
+    if (this.state.shouldBreak === null) {
+      this.state.shouldBreak = this.breakChecker(this.state.ctx);
+    }
+
+    return this.state.shouldBreak;
+  };
+
+  private cleanup() {
+    this.state = structuredClone(this.defaultState);
+  }
 }
