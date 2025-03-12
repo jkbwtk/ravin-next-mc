@@ -1,6 +1,6 @@
 import { Task } from '#/tasks/Task';
 
-export class PickFirstFromArray<T> extends Task<T, undefined, T> {
+export class Break<T> extends Task<T, undefined, T> {
   private ctx: T = null!;
 
   private shouldBreak: (ctx: T) => boolean;
