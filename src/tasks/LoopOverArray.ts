@@ -53,6 +53,10 @@ export class LoopOverArray<SINGLE_CTX> extends Task<
   }
 
   public tick = () => {
+    if (this.task.running === false) {
+      return;
+    }
+
     this.task.tick();
 
     if (this.task.isDone()) {
