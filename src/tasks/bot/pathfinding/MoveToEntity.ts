@@ -25,7 +25,7 @@ export class MoveToEntity extends BasePathfinder<
   protected goalGenerator = () => {
     const point = this.state.point;
 
-    return new goals.GoalNearXZ(point.x, point.z, this.options.range);
+    return new goals.GoalNear(point.x, point.y, point.z, this.options.range);
   };
 
   constructor(
