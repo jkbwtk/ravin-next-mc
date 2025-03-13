@@ -32,6 +32,9 @@ importers:
       prismarine-entity:
         specifier: ^2.5.0
         version: 2.5.0
+      prismarine-item:
+        specifier: ^1.16.0
+        version: 1.16.0
       prismarine-registry:
         specifier: ^1.11.0
         version: 1.11.0
