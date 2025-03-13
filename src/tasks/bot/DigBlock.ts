@@ -11,13 +11,17 @@ interface State {
 }
 
 export type DigBlockOptions = {
+  useBestTool?: boolean;
+
   ignoreFailure?: boolean;
   inSight?: boolean;
   verifyBlock?: boolean;
 };
 
-export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
+export class DigBlock extends BotTask<Block | Vec3, undefined, Block> {
   defaultOptions: RequiredDefaults<DigBlockOptions> = {
+    useBestTool: true,
+
     ignoreFailure: true,
     inSight: true,
     verifyBlock: true,
@@ -56,12 +60,8 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
       return;
     }
 
-    const bestTool = this.bot.pathfinder.bestHarvestTool(
-      this.state.targetBlock,
-    );
-
-    if (bestTool) {
-      this.bot.equip(bestTool, 'hand');
+    if (this.options.useBestTool) {
+      this.switchToBestTool();
     }
 
     this.bot
@@ -72,6 +72,18 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
       .catch(() => {
         this.state.failed = true;
       });
+  }
+
+  public onDone(): Block {
+    const block = this.bot.blockAt(this.state.targetBlock.position)!;
+
+    this.cleanup();
+
+    return block;
+  }
+
+  public onFailed(): void {
+    this.cleanup();
   }
 
   private isValid(): boolean {
@@ -100,4 +112,18 @@ export class DigBlock extends BotTask<Block | Vec3, undefined, undefined> {
 
   public isFailed = () =>
     this.options.ignoreFailure ? false : this.state.failed;
+
+  private cleanup() {
+    this.state = structuredClone(this.defaultState);
+  }
+
+  private switchToBestTool() {
+    const bestTool = this.bot.pathfinder.bestHarvestTool(
+      this.state.targetBlock,
+    );
+
+    if (bestTool) {
+      this.bot.equip(bestTool, 'hand');
+    }
+  }
 }
