@@ -4,61 +4,71 @@ import { type RequiredDefaults, mergeOptions } from '#/utils';
 type TASK<SINGLE_CTX> = Task<SINGLE_CTX, unknown, void>;
 
 interface State<SINGLE_CTX> {
-  ctx: SINGLE_CTX[];
+  array: SINGLE_CTX[];
   triggerCtx: unknown;
 
   hasFinished: boolean;
   hasFailed: boolean;
 }
 
-export type LoopOverArrayOptions = {
+export type LoopOverArrayOptions<ELEMENT_TYPE> = {
   ignoreFailure?: boolean;
+  cloneArray?: boolean;
+
+  selectNext?: (array: ELEMENT_TYPE[]) => ELEMENT_TYPE | undefined;
 };
 
-export class LoopOverArray<SINGLE_CTX> extends Task<
-  SINGLE_CTX[],
+export class LoopOverArray<ELEMENT_TYPE> extends Task<
+  ELEMENT_TYPE[],
   undefined,
   void
 > {
-  private defaultOptions: RequiredDefaults<LoopOverArrayOptions> = {
-    ignoreFailure: false,
-  };
+  private defaultOptions: RequiredDefaults<LoopOverArrayOptions<ELEMENT_TYPE>> =
+    {
+      ignoreFailure: false,
+      cloneArray: false,
 
-  private defaultState: State<SINGLE_CTX> = {
-    ctx: [],
+      selectNext: (array: ELEMENT_TYPE[]) => array.shift(),
+    };
+
+  private defaultState: State<ELEMENT_TYPE> = {
+    array: [],
     triggerCtx: null,
 
     hasFinished: false,
     hasFailed: false,
   };
 
-  private options: Required<LoopOverArrayOptions>;
+  private options: Required<LoopOverArrayOptions<ELEMENT_TYPE>>;
 
-  private task: TASK<SINGLE_CTX>;
+  private task: TASK<ELEMENT_TYPE>;
 
   private state = structuredClone(this.defaultState);
 
-  constructor(task: TASK<SINGLE_CTX>, options: LoopOverArrayOptions = {}) {
+  constructor(
+    task: TASK<ELEMENT_TYPE>,
+    options: LoopOverArrayOptions<ELEMENT_TYPE> = {},
+  ) {
     super();
 
     this.task = task;
     this.options = mergeOptions(options, this.defaultOptions);
   }
 
-  public onStart(taskCtx: SINGLE_CTX[], triggerCtx: unknown): void {
+  public onStart(array: ELEMENT_TYPE[], triggerCtx: unknown): void {
     this.state = structuredClone(this.defaultState);
 
-    this.state.ctx = taskCtx.slice();
+    this.state.array = this.options.cloneArray ? array.slice() : array;
     this.state.triggerCtx = triggerCtx;
 
-    const singleCtx = this.state.ctx.shift();
+    const element = this.options.selectNext(this.state.array);
 
-    if (singleCtx === undefined) {
+    if (element === undefined) {
       this.state.hasFinished = true;
       return;
     }
 
-    this.task.onStart(singleCtx, triggerCtx);
+    this.task.onStart(element, triggerCtx);
     this.task.running = true;
   }
 
@@ -81,7 +91,7 @@ export class LoopOverArray<SINGLE_CTX> extends Task<
       this.task.onDone();
       this.task.running = false;
 
-      const singleCtx = this.state.ctx.shift();
+      const singleCtx = this.options.selectNext(this.state.array);
 
       if (singleCtx === undefined) {
         this.state.hasFinished = true;
